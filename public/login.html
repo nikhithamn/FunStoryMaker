@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css" />
+
+    <style>
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background-color: #f0f8ff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        width: 400px;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        border-radius: 15px;
+        background: linear-gradient(to right, #ffcccb, #add8e6);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        box-sizing: border-box;
+      }
+
+      header {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      h1 {
+        color: #484cca;
+      }
+
+      p {
+        font-size: 1.2em;
+        color: #4682b4;
+        text-align: center;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      input {
+        width: calc(100% - 20px);
+        padding: 10px;
+        border: 2px solid #ff6347;
+        border-radius: 5px;
+        font-size: 1em;
+        margin: 0;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #d78caf;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+        font-size: 16px;
+        margin-top: 10px;
+      }
+
+      .btn:hover {
+        background-color: #4682b4;
+      }
+
+      .forgot-password {
+        margin-top: 10px;
+        text-align: center;
+        font-size: 0.9em;
+      }
+
+      footer {
+        margin-top: 20px;
+        font-size: 0.8em;
+        color: #555;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <header>
+        <h1>Login to Story Listing</h1>
+      </header>
+
+      <form id="login-form" onsubmit="return validateLogin(event)">
+        <div class="form-group">
+          <label for="username">Username:</label>
+          <input type="text" id="username" name="username" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" required />
+        </div>
+        <button type="submit" class="btn">Login</button>
+      </form>
+
+      <p>Don't have an account? <a href="register.html">Register here</a></p>
+      <div class="forgot-password">
+        <a href="forgot-password.html">Forgot Password?</a>
+      </div>
+    </div>
+
+    <script>
+      async function validateLogin(event) {
+        event.preventDefault(); // Prevent form submission
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        // Simple validation to ensure both fields are filled
+        if (username === "" || password === "") {
+          alert("Please fill in all fields.");
+          return false;
+        }
+
+        // Regex to check if the username looks like an email
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        // Check if the username looks like an email
+        if (emailPattern.test(username)) {
+          alert("Please enter a username, not an email address.");
+          return false; // Stop further processing if it's an email
+        }
+
+        // Make the login request if everything is valid
+        try {
+          const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // Login successful, store the token and user ID
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user_id", data.userId); // Store user ID
+            window.location.href = "storylisting.html"; // Redirect to story listing page
+          } else {
+            // Handle errors (e.g., invalid credentials)
+            alert(data.message || "Login failed.");
+          }
+        } catch (error) {
+          console.error("Error logging in:", error);
+          alert("An error occurred. Please try again.");
+        }
+
+        return false; // Prevent form submission
+      }
+    </script>
+  </body>
+</html>

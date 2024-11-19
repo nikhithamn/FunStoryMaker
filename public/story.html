@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Story</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="sessionManager.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Your Stories</h1>
+        <h3>View and manage all your stories in one place.</h3>
+        <div class="header-buttons">
+          <a href="storyhome.html" class="header-button">Go to Story Creator</a>
+          <a href="storylisting.html" class="header-button">Go To Stories</a>
+        </div>
+        <div class="auth-buttons" id="auth-buttons">
+          <!-- Buttons will be dynamically generated here -->
+        </div>
+      </header>
+
+      <div class="main-content">
+        <nav class="left-menu">
+          <h2>Writing Tips</h2>
+          <ul>
+            <li>
+              Tip 1: Start with a strong opening sentence to grab attention.
+            </li>
+            <li>
+              Tip 2: Create relatable characters that kids can connect with.
+            </li>
+            <li>Tip 3: Use vivid descriptions to bring your story to life.</li>
+            <li>
+              Tip 4: Include a problem or conflict for the characters to solve.
+            </li>
+            <li>Tip 5: End with a moral or lesson for the readers.</li>
+          </ul>
+
+          <h2>Story Prompts</h2>
+          <button id="generate-prompt">Get a Prompt</button>
+          <p id="prompt-display"></p>
+
+          <h2>Character Builder</h2>
+          <button id="build-character">Generate Character</button>
+          <p id="character-display"></p>
+
+          <h2>Setting Ideas</h2>
+          <button id="build-setting">Generate Setting</button>
+          <p id="setting-display"></p>
+        </nav>
+
+        <main>
+          <div id="editor-container" style="display: block">
+            <input
+              type="text"
+              id="edit-story-title"
+              placeholder="Edit story title"
+            />
+            <div id="edit-editor"></div>
+            <button id="save-edit-button">Save Changes</button>
+          </div>
+        </main>
+      </div>
+
+      <footer>
+        <a href="storyhome.html">Back to Story Creator</a>
+        <p>&copy; 2024 Fun Story Makers</p>
+      </footer>
+    </div>
+
+    <script>
+      function updateAuthButtons() {
+        const authButtonsContainer = document.getElementById("auth-buttons");
+        const token = localStorage.getItem("token");
+
+        authButtonsContainer.innerHTML = ""; // Clear existing buttons
+
+        if (token) {
+          authButtonsContainer.innerHTML = `
+                    <a href="myaccount.html" class="btn">My Profile</a>
+                    <a href="mydrafts.html" class="btn">My Drafts</a>
+                    <a href="mystories.html" class="btn">My Stories</a>
+                    <a href="#" class="btn" onclick="logout()">Logout</a>
+                `;
+        } else {
+          authButtonsContainer.innerHTML = `
+                    <a href="login.html" class="btn">Login</a>
+                    <a href="register.html" class="btn">Register</a>
+                `;
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem("token");
+        alert("Logged out successfully!");
+        updateAuthButtons();
+      }
+
+      const quill = new Quill("#edit-editor", {
+        theme: "snow",
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, false] }],
+            ["bold", "italic", "underline"],
+            [{ list: "ordered" }, { list: "bullet" }],
+            ["image", "code-block"],
+          ],
+        },
+      });
+
+      // Handle image upload
+      const toolbar = quill.getModule("toolbar");
+      toolbar.addHandler("image", () => {
+        const input = document.createElement("input");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", "image/png, image/jpeg, image/gif");
+
+        input.onchange = async () => {
+          const file = input.files[0];
+          if (file) {
+            const formData = new FormData();
+            formData.append("image", file);
+
+            const response = await fetch("/api/upload", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              const imageUrl = data.imagePath;
+              const range = quill.getSelection();
+              quill.insertEmbed(range.index, "image", imageUrl);
+            } else {
+              alert("Failed to upload image");
+            }
+          }
+        };
+
+        input.click();
+      });
+
+      function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+      }
+
+      window.onload = async function () {
+        // Update authentication buttons
+        updateAuthButtons();
+
+        // Load the story if an ID is provided
+        const storyId = getQueryParam("id");
+
+        if (storyId) {
+          const response = await fetch(`/api/stories/${storyId}`);
+          const story = await response.json();
+
+          if (story) {
+            document.getElementById("edit-story-title").value = story.title;
+            quill.root.innerHTML = story.content;
+
+            document
+              .getElementById("save-edit-button")
+              .addEventListener("click", async () => {
+                const newTitle = document
+                  .getElementById("edit-story-title")
+                  .value.trim();
+                const newContent = quill.root.innerHTML;
+
+                if (newTitle !== story.title || newContent !== story.content) {
+                  const response = await fetch(`/api/stories/${storyId}`, {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      title: newTitle,
+                      content: newContent,
+                    }),
+                  });
+
+                  if (response.ok) {
+                    alert("Your story has been updated!");
+                    location.reload();
+                  } else {
+                    alert("Error updating the story.");
+                  }
+                } else {
+                  alert("No changes made to the story.");
+                }
+              });
+          } else {
+            alert("Story not found.");
+          }
+        } else {
+          alert("No story selected.");
+        }
+
+        // Load saved stories for the left menu
+        //   const storiesResponse = await fetch(
+        //     "http://localhost:3000/api/stories"
+        //   );
+        //   const stories = await storiesResponse.json();
+        //   const storyList = document.querySelector("#story-list");
+        //   stories.forEach((story) => {
+        //     const storyItem = document.createElement("li");
+        //     storyItem.innerHTML = `<a href="story.html?id=${encodeURIComponent(
+        //       story.id
+        //     )}">${story.title}</a>`;
+        //     storyList.appendChild(storyItem);
+        //   });
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Environment variable files
+.env
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# Build directories
+/dist
+/build
+/out
+
+# TypeScript build output
+/tsconfig.json
+
+# VS Code
+.vscode/
+
+# User-uploaded files
+/uploads/
+
+# AWS Elastic Beanstalk
+.ebextensions/

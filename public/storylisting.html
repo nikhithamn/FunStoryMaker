@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Story Listing</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="header-content">
+          <div class="logo">
+            <a href="images/LOGO.png">
+              <img src="images/LOGO.png" alt="Company Logo" />
+            </a>
+          </div>
+          <h1>FUNSTORYMAKER</h1>
+        </div>
+        <h3>View and manage all your stories in one place.</h3>
+        <div class="header-buttons">
+          <a href="storyhome.html" class="header-button">Go To Story Creator</a>
+        </div>
+        <div class="auth-buttons" id="auth-buttons"></div>
+      </header>
+
+      <div class="main-content">
+        <nav class="left-menu">
+          <div class="accordion-item">
+            <button
+              id="all-stories"
+              class="accordion-button"
+              aria-expanded="true"
+            >
+              All Stories
+            </button>
+            <ul
+              id="story-list"
+              class="accordion-content"
+              style="display: block"
+            ></ul>
+          </div>
+        </nav>
+
+        <main>
+          <section id="featured-story" class="story-preview">
+            <div id="featured-content"></div>
+          </section>
+          <h2 id="story-title"></h2>
+          <div id="story-content"></div>
+        </main>
+
+        <aside>
+          <img id="ad-image" src="" alt="Advertisement" />
+          <a id="buy-button" class="buy-button" href="#" target="_blank"
+            >Buy Now</a
+          >
+        </aside>
+      </div>
+
+      <footer>
+        <a href="storyhome.html">Back to Story Creator</a>
+        <p>&copy; 2024 Fun Story Makers</p>
+      </footer>
+    </div>
+
+    <script>
+      const API_URL = "https://62.72.57.36:3000"; // Use your production URL here
+      function updateAuthButtons() {
+        const authButtonsContainer = document.getElementById("auth-buttons");
+        const token = localStorage.getItem("token");
+
+        authButtonsContainer.innerHTML = "";
+
+        if (token) {
+          authButtonsContainer.innerHTML = `
+            <a href="myaccount.html" class="btn">My Profile</a>
+            <a href="mydrafts.html" class="btn">My Drafts</a>
+            <a href="mystories.html" class="btn">My Stories</a>
+            <a href="#" class="btn" onclick="logout()">Logout</a>
+          `;
+        } else {
+          authButtonsContainer.innerHTML = `
+            <a href="login.html" class="btn">Login</a>
+            <a href="register.html" class="btn">Register</a>
+          `;
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem("token");
+        alert("Logged out successfully!");
+        updateAuthButtons();
+        loadStories(); // Load stories after logout to update UI
+      }
+
+      function checkSession() {
+        const token = localStorage.getItem("token");
+
+        // Handle token expiration logic
+        if (token) {
+          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+          const tokenExpiration = tokenPayload.exp * 1000;
+
+          if (Date.now() >= tokenExpiration) {
+            localStorage.removeItem("token");
+          }
+        }
+
+        updateAuthButtons(); // Update UI on session check
+      }
+
+      async function loadStories() {
+        try {
+          const response = await fetch("/api/stories");
+          const stories = await response.json();
+          const storyList = document.querySelector("#story-list");
+
+          // Clear existing stories before adding new ones
+          storyList.innerHTML = "";
+
+          stories.forEach((story) => {
+            const storyItem = document.createElement("li");
+            storyItem.innerHTML = `<a href="#" class="story-link" data-title="${encodeURIComponent(
+              story.title
+            )}">${story.title}</a>`;
+            storyList.appendChild(storyItem);
+          });
+
+          // Display the first story in the main content
+          if (stories.length > 0) {
+            const firstStory = stories[0];
+            displayStoryContent(firstStory);
+          }
+        } catch (error) {
+          console.error("Error loading stories:", error);
+        }
+      }
+
+      function displayStoryContent(story) {
+        const publishedDate = new Date(story.publishedOn).toLocaleDateString();
+        document.getElementById("story-title").textContent = story.title;
+        document.getElementById("story-content").innerHTML = `
+          <p class="submitted-info">
+            <sub>Submitted By: ${story.authorFirstName} ${story.authorLastName} | Published on: ${publishedDate}</sub>
+          </p>
+          <p>${story.content}</p>
+        `;
+        setAdContent(story);
+      }
+
+      function setAdContent(story) {
+        const adImage = document.getElementById("ad-image");
+        const buyButton = document.getElementById("buy-button");
+
+        if (story.buyImage && story.buyLink) {
+          adImage.src = story.buyImage;
+          buyButton.href = story.buyLink;
+          buyButton.style.display = "inline-block";
+          adImage.style.display = "block"; // Show the ad image
+        } else {
+          // Hide ad image and buy button if there are no valid links
+          adImage.style.display = "none";
+          buyButton.style.display = "none";
+        }
+      }
+
+      window.onload = () => {
+        checkSession(); // Check session status on page load
+        loadStories(); // Load stories on startup
+      };
+
+      document.addEventListener("click", async function (event) {
+        if (event.target.classList.contains("story-link")) {
+          event.preventDefault();
+          const storyTitle = decodeURIComponent(
+            event.target.getAttribute("data-title")
+          );
+          await loadStoryContent(storyTitle);
+          // Hide the featured story section when a story is selected
+          document.getElementById("featured-story").style.display = "none";
+        }
+      });
+
+      async function loadStoryContent(title) {
+        try {
+          const response = await fetch("/api/stories");
+          const stories = await response.json();
+          const story = stories.find((s) => s.title === title);
+
+          if (story) {
+            displayStoryContent(story);
+          } else {
+            document.getElementById("story-title").textContent =
+              "Story not found.";
+            document.getElementById("story-content").textContent = "";
+          }
+        } catch (error) {
+          console.error("Error loading story content:", error);
+        }
+      }
+
+      let lastActivityTime = Date.now();
+      const inactivityLimit = 30 * 60 * 1000; // 1 minute
+      let isLoggedOut = false; // Flag to prevent multiple alerts
+
+      function resetTimer() {
+        lastActivityTime = Date.now();
+      }
+      function checkInactivity() {
+        const currentTime = Date.now();
+        if (currentTime - lastActivityTime >= inactivityLimit) {
+          handleInactivityLogout();
+        }
+      }
+
+      function handleInactivityLogout() {
+        const currentUrl = window.location.pathname;
+        if (isLoggedOut) return; // Prevent multiple alerts
+
+        isLoggedOut = true;
+        localStorage.removeItem("token");
+        alert("Session expired. You have been logged out.");
+        updateAuthButtons();
+        // Remove redirection to login page
+        // window.location.href = "login.html";
+      }
+
+      // Initialize session management
+      document.addEventListener("mousemove", resetTimer);
+      document.addEventListener("keypress", resetTimer);
+      setInterval(checkInactivity, 10000); // Check every 10 seconds
+    </script>
+  </body>
+</html>

@@ -1,0 +1,379 @@
+body {
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  background-color: #f0f8ff;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  height: 100vh; /* Allow the container height to be flexible */
+  display: flex;
+  flex-direction: column; /* Stack header, content, and footer vertically */
+  padding: 20px;
+  border-radius: 15px;
+  background: linear-gradient(to right, #ffcccb, #add8e6);
+  box-sizing: border-box; /* Include padding in height calculation */
+}
+
+header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+h1 {
+  color: #484cca;
+}
+
+p {
+  font-size: 1.2em;
+  color: #4682b4;
+  max-width: 1200px;
+}
+
+header p {
+  text-align: center;
+  margin-left: 180px;
+  margin-bottom: 50px;
+}
+
+.main-content {
+  display: flex;
+  flex: 1; /* Allow main content to grow and fill space */
+  margin: 10px 0; /* Add vertical margin */
+  padding: 10px; /* Inner padding */
+  border-radius: 10px; /* Optional rounded corners */
+  background-color: #fff; /* Add a background color for contrast */
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.left-menu {
+  flex: 1;
+  padding: 20px;
+  background-color: #ffebcd;
+  border-radius: 10px;
+  margin-right: 20px;
+}
+
+.left-menu h2 {
+  color: #484cca;
+}
+
+.left-menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.left-menu li {
+  margin: 10px 0;
+}
+
+.left-menu a {
+  text-decoration: none;
+  color: #4682b4;
+  font-weight: bold;
+}
+
+.left-menu a:hover {
+  color: #ff6347;
+}
+
+main {
+  flex: 3;
+  display: flex;
+  flex-direction: column; /* Stack textarea and button */
+}
+.name-container {
+  display: flex; /* Use flexbox to align items in a row */
+  margin-bottom: 20px; /* Spacing below the name fields */
+}
+
+input#author-first-name,
+input#author-last-name {
+  width: 50%; /* Set each to 50% width */
+  font-size: 1.2em; /* Adjust font size */
+  padding: 10px; /* Inner padding */
+  border: 2px dashed #ff6347; /* Border color */
+  border-radius: 10px; /* Rounded corners */
+  background-color: #ffebcd; /* Light background */
+  height: 50px; /* Set a fixed height for uniformity */
+}
+
+input#author-first-name {
+  margin-right: 10px; /* Space between first and last name inputs */
+}
+
+input#story-title {
+  width: 100%; /* Full width for story title */
+  font-size: 2em; /* Larger font size */
+  padding: 10px; /* Inner padding */
+  border: 2px dashed #ff6347; /* Border color */
+  border-radius: 10px; /* Rounded corners */
+  background-color: #ffebcd; /* Light background */
+  height: 50px; /* Match height with name fields */
+  margin-bottom: 20px; /* Spacing below */
+}
+input#story-title,
+input#edit-story-title {
+  width: 100%; /* Full width */
+  font-size: 2em; /* Larger font size */
+  padding: 10px; /* Inner padding */
+  border: 2px dashed #ff6347; /* Border color */
+  border-radius: 10px; /* Rounded corners */
+  background-color: #ffebcd; /* Light background */
+  margin-bottom: 20px; /* Spacing below */
+  color: rgb(18, 58, 235);
+}
+
+textarea {
+  flex: 1;
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ff6347;
+  border-radius: 10px;
+  font-size: 1em;
+  resize: none;
+  transition: border-color 0.3s;
+}
+
+textarea:focus {
+  border-color: #4682b4;
+  outline: none;
+}
+
+.submit-button,
+#save-edit-button,
+button#edit-button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 1.2em;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button {
+  background-color: #d78caf;
+}
+
+.submit-button:hover {
+  background-color: #4682b4;
+}
+
+#save-edit-button {
+  background-color: #b36067;
+}
+
+.save-edit-button:hover {
+  background-color: #4682b4;
+}
+
+button#edit-button {
+  background-color: #413f3e;
+}
+
+footer {
+  margin-top: 20px;
+  font-size: 0.8em;
+  color: #555;
+  text-align: center;
+}
+
+#rich-text-editor {
+  flex: 1;
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ff6347;
+  border-radius: 10px;
+  background-color: #ffebcd; /* Light background */
+  color: #333; /* Text color */
+  transition: background-color 0.3s;
+}
+
+#rich-text-editor:focus {
+  background-color: #ffcccb; /* Light pink background on focus */
+  outline: none; /* Remove default outline */
+}
+
+.accordion-item {
+  margin-bottom: 10px;
+}
+
+.accordion-button {
+  background-color: #d78caf;
+  color: white;
+  border: none;
+  padding: 10px;
+  text-align: left;
+  width: 100%; /* Full width */
+  font-size: 1.2em;
+  cursor: pointer;
+  border-radius: 5px;
+  position: relative;
+}
+
+.accordion-content {
+  display: none;
+  padding: 10px;
+  margin-top: 5px;
+  background-color: #ffebcd;
+  margin-left: 10px;
+}
+
+h2 {
+  color: #555aeb;
+  margin-bottom: 5px; /* Reduce margin below title */
+}
+
+#story-content {
+  margin-top: 0; /* Remove any top margin */
+  padding: 10px; /* You can adjust padding as needed */
+}
+
+#featured-content strong {
+  color: #555aeb;
+}
+
+.custom-image {
+  display: block; /* Makes the image a block element */
+  margin: 0 auto; /* Center the image horizontally */
+  width: 50%; /* Make image responsive */
+  max-width: 400px; /* Limit max width */
+  height: auto; /* Maintain aspect ratio */
+}
+
+img {
+  display: block; /* Makes the image a block element */
+  margin: 0 auto; /* Center the image horizontally */
+  width: 50%; /* Make image responsive */
+  max-width: 400px; /* Limit max width */
+  height: auto; /* Maintain aspect ratio */
+}
+
+.auth-buttons {
+  display: flex; /* Enable flexbox */
+  justify-content: flex-end; /* Align items to the right */
+  margin-top: 10px; /* Space above buttons */
+  align-items: center; /* Align items vertically centered */
+}
+
+.auth-buttons .btn {
+  margin: 0 5px; /* Space between buttons */
+  padding: 10px 20px; /* Space around the text */
+  background-color: #4682b4; /* Button background color */
+  color: white; /* White text */
+  border-radius: 5px; /* Rounded corners */
+  text-decoration: none; /* Remove underline */
+  transition: background-color 0.3s; /* Smooth hover transition */
+}
+
+.auth-buttons .btn:hover {
+  background-color: #355a7a; /* Darker on hover */
+}
+
+aside {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Center align items */
+  width: 20%; /* You can adjust this as needed */
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  text-align: center; /* Center text */
+}
+
+aside img {
+  max-width: 50%; /* Make the image responsive */
+  height: auto; /* Maintain aspect ratio */
+  margin: 0 auto; /* Center the image */
+}
+
+.buy-button {
+  display: inline-block; /* Keep it as inline-block for button styling */
+  margin-top: 10px; /* Space above the button */
+  padding: 10px 20px; /* Adjust padding */
+  background-color: #28a745; /* Button background color */
+  color: white; /* White text */
+  text-decoration: none; /* Remove underline */
+  border-radius: 5px; /* Rounded corners */
+  width: auto; /* Make width auto to fit content */
+  max-width: 100%; /* Match the width of the image */
+  box-sizing: border-box; /* Ensure padding is included in width */
+  text-align: center; /* Center the text in the button */
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column; /* Stack left menu and main content */
+  }
+
+  .left-menu {
+    margin-right: 0; /* Remove right margin */
+    margin-bottom: 20px; /* Add margin below for spacing */
+    flex: none; /* Prevent left menu from growing */
+    width: 100%; /* Full width */
+  }
+
+  main {
+    flex: none; /* Prevent main from growing */
+    width: 100%; /* Full width */
+  }
+
+  .btn {
+    width: 100%; /* Make buttons full width on small screens */
+    margin-bottom: 10px; /* Add space between buttons */
+  }
+
+  input#story-title,
+  input#edit-story-title {
+    font-size: 1.5em; /* Reduce font size on smaller screens */
+  }
+
+  .buy-button {
+    width: auto; /* Allow width to adjust based on content */
+    max-width: 100%; /* Full width on smaller screens */
+  }
+}
+
+.submit-button,
+#save-edit-button,
+button#edit-button {
+  font-size: 1em; /* Smaller button font size */
+}
+
+.advertisement {
+  display: flex; /* Use flexbox */
+  flex-direction: column; /* Stack image and label vertically */
+  align-items: center; /* Center items horizontally */
+  width: 100%; /* Full width */
+  margin: 20px 0; /* Space above and below */
+}
+
+.ad-image {
+  max-width: 100%; /* Make the image responsive */
+  height: auto; /* Maintain aspect ratio */
+}
+
+.ad-label {
+  margin-top: 10px; /* Space between image and label */
+  text-align: center; /* Center the label */
+  color: #555; /* Label color */
+}
+
+.header-button {
+  display: inline-block; /* Allows width/height and margin/padding */
+  padding: 10px 20px; /* Space around the text */
+  background-color: #d78caf; /* Button color */
+  color: white; /* Text color */
+  text-decoration: none; /* Remove underline */
+  border-radius: 5px; /* Rounded corners */
+  transition: background-color 0.3s; /* Smooth hover transition */
+  margin-left: 10px; /* Space between the two button groups */
+  margin-top: -10px; /* Adjust this value to move the header button up */
+}
+
+.header-button:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+}

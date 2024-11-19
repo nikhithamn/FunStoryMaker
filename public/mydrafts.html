@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Account</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="sessionManager.js"></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <div class="header-content">
+          <div class="logo">
+            <a href="images/LOGO.png">
+              <img src="images/LOGO.png" alt="Company Logo" />
+            </a>
+          </div>
+          <h1>FUNSTORYMAKER</h1>
+        </div>
+        <h3>View and manage all your stories in one place.</h3>
+        <div class="header-buttons">
+          <a href="storyhome.html" class="header-button">Go to Story Creator</a>
+          <a href="storylisting.html" class="header-button">Stories</a>
+        </div>
+        <div class="auth-buttons" id="auth-buttons"></div>
+      </header>
+
+      <div class="main-content">
+        <nav class="left-menu">
+          <div class="accordion-item">
+            <button
+              id="view-drafts"
+              class="accordion-button"
+              aria-expanded="false"
+            >
+              My Drafts
+            </button>
+            <ul
+              id="draft-list"
+              class="accordion-content"
+              style="display: block"
+            ></ul>
+          </div>
+        </nav>
+
+        <main>
+          <div id="story-content">
+            Please select a story to view its content.
+          </div>
+        </main>
+      </div>
+
+      <footer>
+        <p>&copy; 2024 Fun Story Makers</p>
+      </footer>
+    </div>
+
+    <script>
+      function updateAuthButtons() {
+        const authButtonsContainer = document.getElementById("auth-buttons");
+        const token = localStorage.getItem("token");
+
+        authButtonsContainer.innerHTML = "";
+
+        if (token) {
+          authButtonsContainer.innerHTML = `
+                    <a href="myaccount.html" class="btn">My Profile</a>
+                    <a href="mydrafts.html" class="btn">My Drafts</a>
+                    <a href="mystories.html" class="btn">My Stories</a>
+                    <a href="#" class="btn" onclick="logout()">Logout</a>
+                `;
+        } else {
+          authButtonsContainer.innerHTML = `
+                    <a href="login.html" class="btn">Login</a>
+                    <a href="register.html" class="btn">Register</a>
+                `;
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem("token");
+        alert("Logged out successfully!");
+        updateAuthButtons();
+        window.location.href = "login.html"; // Redirect to login
+      }
+
+      async function loadDrafts() {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert("You must be logged in to view your drafts.");
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/my-stories", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (!response.ok) throw new Error("Failed to load drafts");
+
+          const { drafts } = await response.json();
+          const draftList = document.getElementById("draft-list");
+          draftList.innerHTML = ""; // Clear existing drafts
+          const storyContent = document.getElementById("story-content");
+
+          if (drafts.length === 0) {
+            storyContent.innerHTML = `<p>No drafts available. Start adding stories!</p>`;
+          } else {
+            drafts.forEach((story) => {
+              const draftItem = document.createElement("li");
+              const draftLink = document.createElement("a");
+              draftLink.href = "#";
+              draftLink.className = "story-link";
+              draftLink.dataset.title = encodeURIComponent(story.title);
+              draftLink.textContent = story.title;
+
+              // Add click event to load story content
+              draftLink.onclick = function () {
+                loadStoryContent(story.id, true); // Pass true to indicate draft
+              };
+
+              draftItem.appendChild(draftLink);
+              draftList.appendChild(draftItem);
+            });
+
+            // Load the first draft's content as default
+            loadStoryContent(drafts[0].id, true);
+          }
+        } catch (error) {
+          console.error("Error loading drafts:", error);
+          document.getElementById(
+            "story-content"
+          ).innerHTML = `<p>Error loading drafts. Please try again.</p>`;
+        }
+      }
+
+      async function loadStoryContent(storyId, isDraft) {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          alert("You must be logged in to view story content.");
+          return;
+        }
+
+        try {
+          const response = await fetch(`/api/stories/${storyId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (!response.ok) throw new Error("Failed to load story content");
+
+          const story = await response.json();
+          document.getElementById("story-content").innerHTML = `
+                    <h3>${story.title}</h3>
+                    <p class="submitted-info"><sub>Submitted By: ${
+                      story.authorFirstName
+                    } ${story.authorLastName} on ${new Date(
+            story.submittedOn
+          ).toLocaleString()}</sub></p>
+                    <p>${story.content}</p>
+                `;
+
+          // If it's a draft, add the publish and edit buttons
+          if (isDraft) {
+            document.getElementById("story-content").innerHTML += `
+                        <button class="btn" onclick="publishStory(${story.id})">Publish</button>
+                        <button class="btn" onclick="editStory(${story.id})">Edit</button>
+                    `;
+          }
+        } catch (error) {
+          console.error("Error loading story content:", error);
+        }
+      }
+
+      async function publishStory(storyId) {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          alert("You must be logged in to publish stories.");
+          return;
+        }
+
+        try {
+          const response = await fetch(`/api/stories/publish/${storyId}`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ publishedOn: new Date().toISOString() }),
+          });
+
+          if (response.ok) {
+            alert("Story published successfully!");
+            loadDrafts(); // Reload drafts to reflect changes
+          } else {
+            alert("Error publishing story.");
+          }
+        } catch (error) {
+          console.error("Error publishing story:", error);
+        }
+      }
+
+      function editStory(storyId) {
+        window.location.href = `story.html?id=${storyId}`; // Redirect to story editor with the story ID
+      }
+
+      document
+        .getElementById("view-drafts")
+        .addEventListener("click", function () {
+          const draftList = document.getElementById("draft-list");
+          const isActive = draftList.style.display === "block";
+          draftList.style.display = isActive ? "none" : "block"; // Toggle display of drafts
+          if (!isActive) {
+            loadDrafts(); // Load drafts when opening
+          }
+        });
+
+      // Accordion functionality for drafts
+      document.querySelectorAll(".accordion-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const content = button.nextElementSibling;
+          const isExpanded = button.getAttribute("aria-expanded") === "true";
+
+          // Toggle active class for content
+          content.classList.toggle("active");
+          button.setAttribute("aria-expanded", !isExpanded);
+
+          // Show or hide the clicked accordion
+          content.style.display = content.classList.contains("active")
+            ? "block"
+            : "none";
+        });
+      });
+
+      window.onload = () => {
+        updateAuthButtons(); // Update buttons on page load
+        loadDrafts(); // Load drafts on startup
+      };
+    </script>
+  </body>
+</html>

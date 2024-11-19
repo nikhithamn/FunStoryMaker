@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kids Story Creator</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="sessionManager.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="header-content">
+          <div class="logo">
+            <a href="images/LOGO.png">
+              <img src="images/LOGO.png" alt="Company Logo" />
+            </a>
+          </div>
+          <h1>FUNSTORYMAKER</h1>
+        </div>
+        <h3>View and manage all your stories in one place.</h3>
+        <div class="header-buttons">
+          <a href="storylisting.html" class="header-button">Go To Stories</a>
+        </div>
+        <div class="auth-buttons" id="auth-buttons">
+          <!-- Buttons will be dynamically generated here -->
+        </div>
+      </header>
+
+      <div class="main-content">
+        <nav class="left-menu">
+          <h2>Writing Tips</h2>
+          <ul>
+            <li>
+              Tip 1: Start with a strong opening sentence to grab attention.
+            </li>
+            <li>
+              Tip 2: Create relatable characters that kids can connect with.
+            </li>
+            <li>Tip 3: Use vivid descriptions to bring your story to life.</li>
+            <li>
+              Tip 4: Include a problem or conflict for the characters to solve.
+            </li>
+            <li>Tip 5: End with a moral or lesson for the readers.</li>
+          </ul>
+
+          <h2>Story Prompts</h2>
+          <button id="generate-prompt">Get a Prompt</button>
+          <p id="prompt-display"></p>
+
+          <h2>Character Builder</h2>
+          <button id="build-character">Generate Character</button>
+          <p id="character-display"></p>
+
+          <h2>Setting Ideas</h2>
+          <button id="build-setting">Generate Setting</button>
+          <p id="setting-display"></p>
+        </nav>
+        <main>
+          <input type="text" id="story-title" placeholder="Story Title" />
+          <div class="name-container">
+            <input
+              type="text"
+              id="author-first-name"
+              placeholder="First Name"
+            />
+            <input type="text" id="author-last-name" placeholder="Last Name" />
+          </div>
+          <div id="editor"></div>
+          <button class="submit-button">Save Your Story</button>
+        </main>
+      </div>
+
+      <footer>
+        <p>&copy; 2024 Fun Story Makers</p>
+      </footer>
+    </div>
+
+    <script>
+      // Initialize Quill editor
+      var quill = new Quill("#editor", {
+        theme: "snow",
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, false] }],
+            ["bold", "italic", "underline"],
+            [{ list: "ordered" }, { list: "bullet" }],
+            ["image", "code-block"],
+          ],
+        },
+      });
+
+      // Handle image upload
+      const toolbar = quill.getModule("toolbar");
+      toolbar.addHandler("image", () => {
+        const input = document.createElement("input");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", "image/png, image/jpeg, image/gif");
+
+        input.onchange = async () => {
+          const file = input.files[0];
+          if (file) {
+            const formData = new FormData();
+            formData.append("image", file);
+
+            const response = await fetch("/api/upload", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              const imageUrl = data.imagePath;
+              const range = quill.getSelection();
+              quill.insertEmbed(range.index, "image", imageUrl);
+            } else {
+              alert("Failed to upload image");
+            }
+          }
+        };
+
+        input.click();
+      });
+
+      function updateAuthButtons() {
+        const authButtonsContainer = document.getElementById("auth-buttons");
+        const token = localStorage.getItem("token");
+
+        authButtonsContainer.innerHTML = ""; // Clear existing buttons
+
+        if (token) {
+          authButtonsContainer.innerHTML = `
+                <div class="user-profile-card">
+                    <a href="myaccount.html" class="btn">My Profile</a>
+                    <a href="mydrafts.html" class="btn">My Drafts</a>
+                    <a href="mystories.html" class="btn">My Stories</a>
+                    <a href="#" class="btn" onclick="logout()">Logout</a>
+                </div>
+                `;
+        } else {
+          authButtonsContainer.innerHTML = `
+                <a href="login.html" class="btn">Login</a>
+                <a href="register.html" class="btn">Register</a>
+                `;
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem("token");
+        alert("Logged out successfully!");
+        updateAuthButtons();
+      }
+      // Save button functionality
+      document
+        .querySelector(".submit-button")
+        .addEventListener("click", async function () {
+          const storyTitle = document
+            .getElementById("story-title")
+            .value.trim();
+          const authorFirstName = document
+            .getElementById("author-first-name")
+            .value.trim();
+          const authorLastName = document
+            .getElementById("author-last-name")
+            .value.trim();
+          const storyText = quill.root.innerHTML;
+
+          if (storyTitle && storyText.trim()) {
+            const confirmation = confirm(
+              "Are you sure you want to save the story as a draft?"
+            );
+            if (confirmation) {
+              const token = localStorage.getItem("token");
+              const userId = localStorage.getItem("user_id");
+
+              if (!token) {
+                alert("You must be logged in to save a story.");
+                return;
+              }
+
+              try {
+                const response = await fetch("/api/stories", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    title: storyTitle,
+                    content: storyText,
+                    authorFirstName: authorFirstName,
+                    authorLastName: authorLastName,
+                    submittedBy: userId,
+                    submittedOn: new Date().toISOString(),
+                  }),
+                });
+
+                if (response.ok) {
+                  alert(
+                    "Your story has been saved as a draft! Go to My Account - Drafts to Edit or Publish"
+                  );
+                  location.reload(); // Refresh the page
+                } else {
+                  const errorData = await response.json();
+                  alert(
+                    "Error saving your story: " +
+                      (errorData.message || response.statusText)
+                  );
+                }
+              } catch (error) {
+                console.error("Error during the fetch:", error);
+                alert("An unexpected error occurred. Please try again.");
+              }
+            }
+          } else {
+            alert("Please enter a title and write a story before saving!");
+          }
+        });
+      // Generate story prompt
+      const prompts = [
+        "A cat that can talk suddenly appears in a small town.",
+        "A young girl finds a hidden door in her garden that leads to another world.",
+        "A magical book that writes its own story when opened.",
+        "A boy discovers he can communicate with animals.",
+        "An enchanted tree that grants wishes on full moons.",
+      ];
+
+      document
+        .getElementById("generate-prompt")
+        .addEventListener("click", () => {
+          const randomPrompt =
+            prompts[Math.floor(Math.random() * prompts.length)];
+          document.getElementById("prompt-display").innerText = randomPrompt;
+        });
+
+      // Generate character
+      const characters = [
+        "A brave knight",
+        "A clever fox",
+        "A magical fairy",
+        "A curious robot",
+        "A kind-hearted giant",
+      ];
+
+      document
+        .getElementById("build-character")
+        .addEventListener("click", () => {
+          const randomCharacter =
+            characters[Math.floor(Math.random() * characters.length)];
+          document.getElementById("character-display").innerText =
+            randomCharacter;
+        });
+
+      // Generate setting
+      const settings = [
+        {
+          description: "In a dark forest",
+          details:
+            "Tall, twisted trees loom overhead, their leaves whispering secrets in the wind. Mysterious shadows flit between the trunks, and a sense of magic hangs in the air.",
+        },
+        {
+          description: "On a floating island",
+          details:
+            "A serene island drifts above the clouds, filled with vibrant flowers and lush greenery. Waterfalls cascade off the edges into the sky, and the sun bathes everything in a golden glow.",
+        },
+        {
+          description: "In a busy city",
+          details:
+            "Skyscrapers stretch towards the sky, bustling with activity. Street vendors call out, and children play in the parks, while the sound of laughter and chatter fills the air.",
+        },
+        {
+          description: "Inside a magical castle",
+          details:
+            "Grand halls filled with shimmering chandeliers and ornate tapestries. Secret passageways and enchanted objects come to life, inviting adventures around every corner.",
+        },
+        {
+          description: "Under the sea",
+          details:
+            "A colorful underwater world teeming with life. Coral reefs sparkle with hues of pink and orange, and curious fish swim around, exploring the hidden treasures of the ocean floor.",
+        },
+        {
+          description: "In a snowy mountain village",
+          details:
+            "Charming cottages with smoke curling from chimneys, surrounded by towering peaks. The village is alive with festive decorations and the laughter of children playing in the snow.",
+        },
+        {
+          description: "In a whimsical candy land",
+          details:
+            "A vibrant world where rivers flow with chocolate and trees are made of cotton candy. Sweet aromas fill the air, and every corner offers a new sugary delight to discover.",
+        },
+        {
+          description: "In an ancient temple",
+          details:
+            "Overgrown with vines, this temple holds secrets of a forgotten civilization. Mysterious symbols adorn the walls, and the air is thick with the scent of incense and mystery.",
+        },
+        {
+          description: "On a distant planet",
+          details:
+            "A world filled with strange, colorful flora and fauna. The sky is a kaleidoscope of colors, and the landscape is dotted with bizarre rock formations and shimmering lakes.",
+        },
+        {
+          description: "In a bustling marketplace",
+          details:
+            "A lively bazaar filled with colorful stalls, exotic spices, and vibrant textiles. Merchants haggle loudly while musicians play in the background, creating a symphony of life.",
+        },
+        {
+          description: "In a hidden fairy grove",
+          details:
+            "A serene, enchanted clearing where fairies dance among the flowers. The air sparkles with magic, and the sound of gentle laughter can be heard, inviting you to join in.",
+        },
+        {
+          description: "In a post-apocalyptic world",
+          details:
+            "Ruined cities overrun by nature, where the remnants of civilization tell stories of the past. Survivors navigate through the remnants, searching for hope and a brighter future.",
+        },
+        {
+          description: "Inside a wizard's laboratory",
+          details:
+            "A cluttered room filled with bubbling potions and mysterious artifacts. Scrolls covered in arcane symbols are scattered about, and the air is charged with the scent of magic.",
+        },
+        {
+          description: "In a dreamlike landscape",
+          details:
+            "A surreal world where reality bends and flows like a river. Floating islands, upside-down mountains, and stars that twinkle in the daylight create an atmosphere of wonder.",
+        },
+      ];
+
+      // Function to generate a random setting
+      document.getElementById("build-setting").addEventListener("click", () => {
+        const randomSetting =
+          settings[Math.floor(Math.random() * settings.length)];
+        document.getElementById(
+          "setting-display"
+        ).innerText = `${randomSetting.description}\n${randomSetting.details}`;
+      });
+
+      window.onload = () => {
+        updateAuthButtons(); // Update buttons on page load
+      };
+    </script>
+  </body>
+</html>
