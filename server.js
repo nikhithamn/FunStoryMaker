@@ -21,7 +21,7 @@ function logWithTimestamp(message) {
 }
 
 const corsOptions = {
-  origin: "https://62.72.57.36:3000", // Allow requests only from this origin
+  origin: process.env.ORIGIN_URL, // Allow requests only from this origin
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Specify allowed methods
   credentials: true, // Allow credentials (if needed)
 };
@@ -34,8 +34,8 @@ app.use("/uploads", express.static("uploads"));
 // Create a connection pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
-  user: process.env.DB_NAME,
-  password: process.env.DB_PASSWPRD,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
   database: "story_db",
   waitForConnections: true,
   connectionLimit: 10, // Set your preferred connection limit
@@ -518,5 +518,9 @@ app.get("/api/user/me", authenticateToken, async (req, res) => {
 
 // Start the server
 app.listen(port, "0.0.0.0", () => {
-  console.log(`Server is running at http://0.0.0.0:${port}`);
+  console.log(`Server is running at https://0.0.0.0:${port}`);
 });
+// // Start the server
+// app.listen(port, () => {
+//   logWithTimestamp(`Server is running at http://localhost:${port}`);
+// });
