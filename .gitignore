@@ -10,6 +10,8 @@ npm-debug.log
 yarn-error.log
 package-lock.json
 yarn.lock
+package.json
+
 
 # Environment variable files
 .env
