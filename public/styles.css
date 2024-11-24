@@ -362,3 +362,39 @@ footer {
 footer p {
   margin: 0;
 }
+
+.custom-image {
+  display: block; /* Makes the image a block element */
+  margin: 0 auto; /* Center the image horizontally */
+  width: 50%; /* Make image responsive */
+  max-width: 400px; /* Limit max width */
+  height: auto; /* Maintain aspect ratio */
+}
+
+img {
+  display: block; /* Makes the image a block element */
+  margin: 0 auto; /* Center the image horizontally */
+  width: 50%; /* Make image responsive */
+  max-width: 400px; /* Limit max width */
+  height: auto; /* Maintain aspect ratio */
+}
+/* For Save Changes button, apply the same class and let it sit inside the layout */
+#save-edit-button {
+  margin-top: 20px; /* Adjust spacing for button */
+  align-self: flex-start; /* Keeps it aligned in the container */
+  /* In case you want the button to stay fixed in the editor */
+  position: relative;
+}
+
+#save-edit-button.btn {
+  width: auto; /* Ensure the button doesn't stretch */
+}
+/* Make sure editor container is scrollable when content overflows */
+#editor-container {
+  position: relative;
+  max-height: calc(
+    100vh - 200px
+  ); /* Adjust height to fit within available space */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding-bottom: 50px; /* To give space for the button at the bottom */
+}
