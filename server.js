@@ -139,7 +139,7 @@ app.post("/api/stories", authenticateToken, async (req, res) => {
 
 // API to get all stories
 app.get("/api/stories", async (req, res) => {
-  const query = "SELECT * FROM stories WHERE published = TRUE";
+  const query = "SELECT * FROM stories WHERE published = TRUE"; //get all published stories
   try {
     const results = await executeQuery(query);
     res.json(results);
