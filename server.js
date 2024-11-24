@@ -12,7 +12,7 @@ const crypto = require("crypto");
 require("dotenv").config();
 
 const app = express();
-const port = 3000;
+const port = 4000;
 
 // Function to log messages with a timestamp
 function logWithTimestamp(message) {
@@ -139,7 +139,7 @@ app.post("/api/stories", authenticateToken, async (req, res) => {
 
 // API to get all stories
 app.get("/api/stories", async (req, res) => {
-  const query = "SELECT * FROM stories";
+  const query = "SELECT * FROM stories WHERE published = TRUE";
   try {
     const results = await executeQuery(query);
     res.json(results);
