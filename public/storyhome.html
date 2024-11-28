@@ -25,7 +25,7 @@
         </div>
         <h3>View and manage all your stories in one place.</h3>
         <div class="header-buttons">
-          <a href="storylisting.html" class="header-button">Go To Stories</a>
+          <a href="storylisting" class="header-button">Go To Stories</a>
         </div>
         <div class="auth-buttons" id="auth-buttons">
           <!-- Buttons will be dynamically generated here -->
@@ -136,16 +136,16 @@
         if (token) {
           authButtonsContainer.innerHTML = `
                 <div class="user-profile-card">
-                    <a href="myaccount.html" class="btn">My Profile</a>
-                    <a href="mydrafts.html" class="btn">My Drafts</a>
-                    <a href="mystories.html" class="btn">My Stories</a>
+                    <a href="myaccount" class="btn">My Profile</a>
+                    <a href="mydrafts" class="btn">My Drafts</a>
+                    <a href="mystories" class="btn">My Stories</a>
                     <a href="#" class="btn" onclick="logout()">Logout</a>
                 </div>
                 `;
         } else {
           authButtonsContainer.innerHTML = `
-                <a href="login.html" class="btn">Login</a>
-                <a href="register.html" class="btn">Register</a>
+                <a href="login" class="btn">Login</a>
+                <a href="register" class="btn">Register</a>
                 `;
         }
       }

@@ -398,3 +398,17 @@ img {
   overflow-y: auto; /* Enable vertical scrolling */
   padding-bottom: 50px; /* To give space for the button at the bottom */
 }
+
+/* Hide left menu on small screens */
+@media (max-width: 768px) {
+  .left-menu {
+    display: none;
+  }
+}
+/* Adjust the editor size for small devices */
+@media (max-width: 768px) {
+  #editor {
+    width: 100% !important; /* Ensure the editor takes full width of the screen */
+    height: 300px; /* Adjust height to prevent it from being too small */
+  }
+}

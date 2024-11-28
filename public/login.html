@@ -111,9 +111,9 @@
         <button type="submit" class="btn">Login</button>
       </form>
 
-      <p>Don't have an account? <a href="register.html">Register here</a></p>
+      <p>Don't have an account? <a href="register">Register here</a></p>
       <div class="forgot-password">
-        <a href="forgot-password.html">Forgot Password?</a>
+        <a href="forgot-password">Forgot Password?</a>
       </div>
     </div>
 
@@ -155,7 +155,7 @@
             // Login successful, store the token and user ID
             localStorage.setItem("token", data.token);
             localStorage.setItem("user_id", data.userId); // Store user ID
-            window.location.href = "storylisting.html"; // Redirect to story listing page
+            window.location.href = "storylisting"; // Redirect to story listing page
           } else {
             // Handle errors (e.g., invalid credentials)
             alert(data.message || "Login failed.");

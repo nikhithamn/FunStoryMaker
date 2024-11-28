@@ -21,8 +21,8 @@
         </div>
         <h3>View and manage all your stories in one place.</h3>
         <div class="header-buttons">
-          <a href="storyhome.html" class="header-button">Go to Story Creator</a>
-          <a href="storylisting.html" class="header-button">Stories</a>
+          <a href="storyhome" class="header-button">Go to Story Creator</a>
+          <a href="storylisting" class="header-button">Stories</a>
         </div>
         <div class="auth-buttons" id="auth-buttons"></div>
       </header>
@@ -66,15 +66,15 @@
 
         if (token) {
           authButtonsContainer.innerHTML = `
-                  <a href="myaccount.html" class="btn">My Profile</a>
-                  <a href="mydrafts.html" class="btn">My Drafts</a>
-                  <a href="mystories.html" class="btn">My Stories</a>
+                  <a href="myaccount" class="btn">My Profile</a>
+                  <a href="mydrafts" class="btn">My Drafts</a>
+                  <a href="mystories" class="btn">My Stories</a>
                   <a href="#" class="btn" onclick="logout()">Logout</a>
               `;
         } else {
           authButtonsContainer.innerHTML = `
-                  <a href="login.html" class="btn">Login</a>
-                  <a href="register.html" class="btn">Register</a>
+                  <a href="login" class="btn">Login</a>
+                  <a href="register" class="btn">Register</a>
               `;
         }
       }
@@ -83,7 +83,7 @@
         localStorage.removeItem("token");
         alert("Logged out successfully!");
         updateAuthButtons();
-        window.location.href = "login.html"; // Redirect to login
+        window.location.href = "login"; // Redirect to login
       }
 
       async function loadPublishedStories() {

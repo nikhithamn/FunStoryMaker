@@ -9,10 +9,11 @@ const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+
 require("dotenv").config();
 
 const app = express();
-const port = 4000;
+const port = 3001;
 
 // Function to log messages with a timestamp
 function logWithTimestamp(message) {
@@ -82,6 +83,36 @@ const executeQuery = (query, params) => {
     });
   });
 };
+// Serve static HTML files without extension
+app.get("/:page", (req, res) => {
+  const page = req.params.page;
+  const validPages = [
+    "Home",
+    "about",
+    "contact",
+    "storylisting",
+    "reset-password",
+    "storyhome",
+    "login",
+    "register",
+    "mystories",
+    "mydrafts",
+    "forgot-password",
+    "myaccount",
+    "mydrafts",
+  ]; // Add your valid pages here
+
+  if (validPages.includes(page)) {
+    res.sendFile(path.join(__dirname, "public", `${page}.html`));
+  } else {
+    res.status(404).send("Page not found.");
+  }
+});
+
+// Redirect to /storylisting when accessing the root path
+app.get("/", (req, res) => {
+  res.redirect("/storylisting");
+});
 
 // API to save a new story with optional buyImage and buyLink
 app.post("/api/stories", authenticateToken, async (req, res) => {

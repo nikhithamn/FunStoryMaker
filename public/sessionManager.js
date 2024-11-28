@@ -15,13 +15,13 @@ function checkInactivity() {
 
 function handleInactivityLogout() {
   const currentUrl = window.location.pathname;
-  if (isLoggedOut || currentUrl === "/public-page.html") return; // Prevent multiple alerts
+  if (isLoggedOut || currentUrl === "/public-page") return; // Prevent multiple alerts
 
   isLoggedOut = true;
   localStorage.removeItem("token");
   alert("Session expired. You have been logged out.");
   updateAuthButtons();
-  window.location.href = "login.html"; // Redirect to login page
+  window.location.href = "login"; // Redirect to login page
 }
 
 function logout() {
@@ -29,7 +29,7 @@ function logout() {
   isLoggedOut = true; // Set flag to prevent duplicate alerts
   alert("Logged out successfully!");
   updateAuthButtons();
-  window.location.href = "login.html"; // Redirect to login page
+  window.location.href = "login"; // Redirect to login page
 }
 
 // Initialize session management
