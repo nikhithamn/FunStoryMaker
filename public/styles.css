@@ -399,12 +399,7 @@ img {
   padding-bottom: 50px; /* To give space for the button at the bottom */
 }
 
-/* Hide left menu on small screens */
-@media (max-width: 768px) {
-  .left-menu {
-    display: none;
-  }
-}
+
 /* Adjust the editor size for small devices */
 @media (max-width: 768px) {
   #editor {
